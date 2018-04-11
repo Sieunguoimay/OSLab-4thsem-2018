@@ -1,16 +1,39 @@
+//To make sure that the producer won’t try to add data into the buffer if it’s full 
+//and that the consumer won’t try to remove data from an empty buffer.
+
 #include<stdio.h>
 #include<stdlib.h>
+
+//the semaphore is mutex variable.
+
 int mutex = 1, full = 0 , empty = 3, x = 0;
+int wait(int s){	
+	return (--s);
+}
+int signal(int s){
+	return (++s);
+}
+void producer(){
+	mutex = wait(mutex);
+	full = signal(full);
+	empty = wait(empty);
+	x++;
+	printf("\nProducer produces the item %d", x);
+	mutex = signal(mutex);
+}
+void consumer(){
+	mutex=wait(mutex);
+	full=wait(full);
+	empty=signal(empty);
+	printf("\nConsumer consumes item %d",x);
+	x--;
+	mutex=signal(mutex);
+}
+
 int main(){
 	printf("Hello Consumer Producer Problem using Semaphores\n");
 
 	int n;
-	//function prototypes
-	void producer();
-	void consumer();
-	
-	int wait(int);
-	int signal(int);
 
 	printf("\n1.Producer\n2.Consumer\n3.Exit");
 	while(1){
@@ -36,26 +59,4 @@ int main(){
 		}
 	}
 	return 0;
-}
-int wait(int s){
-	return (--s);
-}
-int signal(int s){
-	return (++s);
-}
-void producer(){
-	mutex = wait(mutex);
-	full = signal(full);
-	empty = wait(empty);
-	x++;
-	printf("\nProducer produces the item %d", x);
-	mutex = signal(mutex);
-}
-void consumer(){
-	mutex=wait(mutex);
-	full=wait(full);
-	empty=signal(empty);
-	printf("\nConsumer consumes item %d",x);
-	x--;
-	mutex=signal(mutex);
 }
